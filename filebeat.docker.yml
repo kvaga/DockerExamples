@@ -14,10 +14,14 @@ filebeat.autodiscover:
 processors:
 - add_cloud_metadata: ~
 
-output.elasticsearch:
-  hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
-  username: '${ELASTICSEARCH_USERNAME:}'
-  password: '${ELASTICSEARCH_PASSWORD:}'
+output.logstash:
+        enabled: true
+        hosts: ["logstash:5044"]
+
+#output.elasticsearch:
+#  hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+#  username: '${ELASTICSEARCH_USERNAME:}'
+#  password: '${ELASTICSEARCH_PASSWORD:}'
 
 filebeat.inputs:
 - type: log
