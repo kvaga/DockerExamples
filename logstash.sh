@@ -29,7 +29,7 @@ function start(){
         -v ~/DockerExamples/logstash.conf:/usr/share/logstash/config/logstash.conf \
 	-p 9600:9600 -p 5044:5044 \
 	--network elk_network \
-	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf 
+	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf --config.reload.automatic
 	echo
 #       -v ~/DockerExamples/logstash-filter.conf:/usr/share/logstash/config/logstash-filter.conf \
 }
@@ -65,12 +65,12 @@ case $1 in
         shell
         ;;
         *)
-        printf "Commands are:"
-        printf "start -"
-        printf "stop -"
-        printf "restart -"
-        printf "logs - "
-        printf "shell - "
+	printf "Commands are:\n"
+        printf "start - \n"
+        printf "stop - \n"
+        printf "restart - \n"
+        printf "logs - \n "
+        printf "shell - \n"
 
         ;;
 

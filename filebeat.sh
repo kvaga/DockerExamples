@@ -95,13 +95,13 @@ case $1 in
 	shell
 	;;
         *)
-        printf "Commands are:"
-        printf "start -"
-        printf "stop -" 
-	printf "restart -"
-	printf "logs - "
-	printf "shell - "
-        
+        printf "Commands are:\n"
+        printf "start - \n"
+        printf "stop - \n"
+        printf "restart - \n"
+        printf "logs - \n "
+        printf "shell - \n"
+ 
         ;;
 
 esac
