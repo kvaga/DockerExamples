@@ -1,5 +1,15 @@
 #!/bin/bash
 
+container_name=logstash
+function pause(){
+	docker container pause $container_name
+}
+function unpause(){
+	docker container unpause $container_name
+}
+function restart(){
+	docker container restart $container_name
+}
 
 function getContainerId(){
         pid=$(docker container ls -a | grep /logstash/logstash | awk {'print $1'})
@@ -21,7 +31,7 @@ function stop(){
 	fi
 }
 
-function start(){
+function run(){
 	echo "Starting logstash container"
 	docker run --name logstash \
 	--rm -it \
@@ -45,19 +55,27 @@ function shell(){
 
 
 case $1 in
-        start)
-        start
+        run)
+        run
         ;;
 
         stop)
         stop
         ;;
 
-        restart)
+        stopAndRun)
         stop
-        start
+        run
         ;;
-
+	pause)
+        pause
+        ;;
+        unpause)
+        unpause
+        ;;
+        restart)
+        restart
+        ;;
         logs)
         logs
         ;;
@@ -66,11 +84,14 @@ case $1 in
         ;;
         *)
 	printf "Commands are:\n"
-        printf "start - \n"
+        printf "run - \n"
         printf "stop - \n"
-        printf "restart - \n"
-        printf "logs - \n "
+        printf "stopAndRun - \n"
+        printf "logs - \n"
         printf "shell - \n"
+        printf "pause - \n"
+        printf "unpause - \n"
+        printf "restart - \n"
 
         ;;
 

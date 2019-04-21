@@ -1,23 +1,12 @@
 #!/bin/bash
-
-container_name=kibana
-function pause(){
-	docker container pause $container_name
-}
-function unpause(){
-	docker container unpause $container_name
-}
-function restart(){
-	docker container restart $container_name
-}
+# https://grafana.com/docs/installation/docker/
+# All options defined in conf/grafana.ini can be overridden using environment variables by using the syntax GF_<SectionName>_<KeyName>
+source ../lib/management_scripts.sh
+container_name=grafana
 
 function getContainerId(){
-        pid=$(docker container ls -a | grep /kibana/kibana | awk {'print $1'})
+        pid=$(docker container ls -a | grep /$container_name/$container_name | awk {'print $1'})
         echo $pid
-}
- function getESContainerId(){
-	pidES=$(docker container ls -a | grep /elasticsearch/elasticsearch | awk {'print $1'})
-	echo $pidES
 }
 
 function stop(){
@@ -36,15 +25,13 @@ function stop(){
 
 
 function run(){
-	elasticsearch_container_id=$(getESContainerId)
-        echo "Starting Kibana for ES [$elasticsearch_container_id]"
-        docker run \
-		--link $elasticsearch_container_id:elasticsearch \
-		--rm \
-		--name kibana \
-		--network elk_network \
-		-p 5601:5601 \
-		docker.elastic.co/kibana/kibana:6.7.1
+	docker run \
+  	-d \
+  	-p 3000:3000 \
+  	--name=$container_name \
+  	-e "GF_SERVER_ROOT_URL=http://$container_name" \
+  	-e "GF_SECURITY_ADMIN_PASSWORD=$1" \
+  	grafana/grafana
 }
 
 
@@ -71,14 +58,14 @@ case $1 in
         stop
         start
         ;;
-        pause)
-        pause
+        suspend)
+        suspend $container_name
         ;;
-        unpause)
-        unpause
+        unsuspend)
+        unsuspend $container_name
         ;;
         restart)
-        restart
+        restart $container_name
         ;;
         logs)
         logs

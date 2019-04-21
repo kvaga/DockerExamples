@@ -1,5 +1,15 @@
 #!/bin/bash
 
+container_name=filebeat
+function pause(){
+	docker container pause $container_name
+}
+function unpause(){
+	docker container unpause $container_name
+}
+function restart(){
+	docker container restart $container_name
+}
 
 function getContainerId(){
 	pid=$(docker container ls -a | grep /beats/filebeat | awk {'print $1'})
@@ -36,7 +46,7 @@ fi
 }
 
 
-function start(){
+function run(){
 
 # Pull image
 # docker pull docker.elastic.co/beats/filebeat:6.7.1
@@ -75,19 +85,27 @@ function shell(){
 
 
 case $1 in
-        start)
-        start
+        run)
+        run
         ;;
 
         stop)
         stop
         ;;
 	
-	restart)
+	stopAndRun)
 	stop
 	start
 	;;
-	
+        pause)
+        pause
+        ;;
+        unpause)
+        unpause
+        ;;
+        restart)
+        restart
+        ;;	
 	logs)
 	logs
 	;;
@@ -96,12 +114,14 @@ case $1 in
 	;;
         *)
         printf "Commands are:\n"
-        printf "start - \n"
+        printf "run - \n"
         printf "stop - \n"
-        printf "restart - \n"
-        printf "logs - \n "
+        printf "stopAndRun - \n"
+        printf "logs - \n"
         printf "shell - \n"
- 
+	printf "pause - \n"
+        printf "unpause - \n"
+        printf "restart - \n" 
         ;;
 
 esac
