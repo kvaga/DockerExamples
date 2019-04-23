@@ -2,52 +2,42 @@
 # https://grafana.com/docs/installation/docker/
 # All options defined in conf/grafana.ini can be overridden using environment variables by using the syntax GF_<SectionName>_<KeyName>
 source ../lib/management_scripts.sh
-container_name=grafana
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep /$container_name/$container_name | awk {'print $1'})
-        echo $pid
-}
-
-function stop(){
-        pid=$(getContainerId)
-        if [ -z "$pid" ]
-        then
-                        echo "Couldn't find container id in the containers list"
-        else
-                        echo "Container ID: $pid"
-                        echo "Stopping container [$pid]..."
-                        docker container stop $pid
-                        echo "Removing container [$pid]..."
-                        docker container rm $pid
-        fi
-}
-
+default_container_name=grafana
 
 function run(){
+	echo "Running grafana instance with [$1] name, [$2] password and [$3] port number"
 	docker run \
   	-d \
-  	-p 3000:3000 \
-  	--name=$container_name \
-  	-e "GF_SERVER_ROOT_URL=http://$container_name" \
-  	-e "GF_SECURITY_ADMIN_PASSWORD=$1" \
+	-p $3:$3 \
+  	--name=$1 \
+  	-e "GF_SERVER_ROOT_URL=http://$1" \
+  	-e "GF_SECURITY_ADMIN_PASSWORD=$2" \
   	grafana/grafana
 }
-
-
-function logs(){
-        docker logs $(getContainerId)
-}
-
-
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
-
-
+echo "#####################################################"
+echo "###############        GRAFANA           ############"
+echo "#####################################################"
 case $1 in
         run)
-        run
+	if [ -z "$2" ]
+	then
+		echo "Can't find a name of grafana's instance. Specify the name of grafana instance in the first parameter. For example:"
+		echo "# $0 run grafana_043 secret 3000"
+		exit 1
+	fi
+	if [ -z "$3" ]
+        then
+                echo "Can't find a password of grafana's instance. Specify the password of grafana instance in the second parameter. For example:"
+                echo "# $0 run grafana_043 secret 3000"
+		exit 1
+        fi
+	if [ -z "$4" ]
+        then
+                echo "Can't find a port number of grafana's instance. Specify the port number of grafana instance in the first parameter. For example:"
+                echo "# $0 run grafana_043 secret 3000"
+		exit 1
+        fi
+	run ${@:2}
         ;;
 
         stop)
