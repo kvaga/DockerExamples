@@ -40,19 +40,40 @@ function shell(){
 
 function run(){
 	echo "Starting logstash container"
-	docker run --name logstash \
+	docker run --name $1 \
 	--rm -it \
-	-v ~/DockerExamples/logstash.yml:/usr/share/logstash/config/logstash.yml \
-        -v ~/DockerExamples/logstash.conf:/usr/share/logstash/config/logstash.conf \
+	-v $(pwd)/logstash.yml:/usr/share/logstash/config/logstash.yml \
+    -v $(pwd)/logstash.conf:/usr/share/logstash/config/logstash.conf \
 	-p 9600:9600 -p 5044:5044 \
 	--network elk_network \
 	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf --config.reload.automatic
 	echo
 #       -v ~/DockerExamples/logstash-filter.conf:/usr/share/logstash/config/logstash-filter.conf \
 }
+echo "#####################################################"
+echo "###############        LOGSTASH          ############"
+echo "#####################################################"
 case $1 in
 	run)
-	run
+	if [ -z "$2" ]
+	then
+		echo "Can't find a name of Logstash's instance. Specify the name of Logstash instance in the first parameter. For example:"
+		echo "# $0 run logstash_043 9600 5044"
+		exit 1
+	fi
+	if [ -z "$3" ]
+	then
+		echo "Can't find a port number of Logstash's instance. Specify the port number of Logstash's instance in the second parameter. For example:"
+		echo "# $0 run logstash_043 9600 5044"
+		exit 1
+	fi
+	if [ -z "$4" ]
+	then
+		echo "Can't find a management port number of Logstash's instance. Specify the management port number of Logstash's instance in the second parameter. For example:"
+		echo "# $0 run logstash_043 9600 5044"
+		exit 1
+	fi
+		run ${@:2}
 	;;
 	stop)
 	stop

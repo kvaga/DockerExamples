@@ -17,10 +17,6 @@ function getContainerId(){
         pid=$(docker container ls -a | grep /kibana/kibana | awk {'print $1'})
         echo $pid
 }
- function getESContainerId(){
-	pidES=$(docker container ls -a | grep /elasticsearch/elasticsearch | awk {'print $1'})
-	echo $pidES
-}
 function logs(){
         docker logs $(getContainerId)
 }
@@ -43,24 +39,48 @@ function shell(){
 #        fi
 #}
 
+function getESContainerId(){
+	pidES=$(docker container ls -a | grep /elasticsearch/elasticsearch | awk {'print $1'})
+	echo $pidES
+}
+
+
 function run(){
 	elasticsearch_container_id=$(getESContainerId)
         echo "Starting Kibana for ES [$elasticsearch_container_id]"
         docker run \
 		--link $elasticsearch_container_id:elasticsearch \
 		--rm \
-		--name kibana \
+		--name $1 \
 		--network elk_network \
-		-p 5601:5601 \
+		-p $2:$2 \
 		docker.elastic.co/kibana/kibana:6.7.1
 }
-
-
-
+echo "#####################################################"
+echo "##############         KIBANA            ############"
+echo "#####################################################"
 
 case $1 in
 	run)
-	run
+		if [ -z "$2" ]
+		then
+			echo "Can't find a name of Kibana's instance. Specify the name of Kibana instance in the first parameter. For example:"
+			echo "# $0 run kibana_043 5601 elasticsearch_043"
+			exit 1
+		fi
+		if [ -z "$3" ]
+			then
+				echo "Can't find a port number of Kibana's instance. Specify the port number of Kibana's instance in the second parameter. For example:"
+				echo "# $0 run kibana_043 5601 elasticsearch_043"
+			exit 1
+			fi
+		if [ -z "$4" ]
+			then
+				echo "Can't find a name of ES's instance. Specify the name of ES instance in the third parameter. For example:"
+				echo "# $0 run kibana_043 5601 elasticsearch_043"
+			exit 1
+		fi
+		run ${@:2}
 	;;
 	stop)
 	stop

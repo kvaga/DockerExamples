@@ -66,7 +66,7 @@ function run(){
 
 	echo "Starting filebeat container"
 	docker run -d \
-	  --name=filebeat \
+	  --name=$1 \
 	  --user=root \
 	  --network elk_network \
 	  --volume="$(pwd)/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro" \
@@ -77,10 +77,18 @@ function run(){
 	#docker.elastic.co/beats/filebeat:6.7.1 filebeat -e -strict.perms=false -E output.elasticsearch.hosts=["elasticsearch:9200"] > filebeat.pid
 	echo
 }
-
+echo "#####################################################"
+echo "###############        FILEBEAT          ############"
+echo "#####################################################"
 case $1 in
 	run)
-	run
+		if [ -z "$2" ]
+		then
+			echo "Can't find a name of Filebeat's instance. Specify the name of filebeat instance in the first parameter. For example:"
+			echo "# $0 run filebeat_043"
+			exit 1
+		fi
+		run ${@:2}
 	;;
 	stop)
 	stop

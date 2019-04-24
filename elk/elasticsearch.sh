@@ -42,20 +42,42 @@ function shell(){
 #        fi
 #}
 
+
+
 function run(){
         echo "Starting elasticsearch container"
         docker run --rm \
-		-p 9200:9200 -p 9300:9300 \
+		-p $2:$2 -p $3:$3 \
 		-e "discovery.type=single-node" \
-		--name elasticsearch \
+		--name $1 \
 		--network elk_network \
 		docker.elastic.co/elasticsearch/elasticsearch:6.7.1
         echo
 }
-
+echo "#####################################################"
+echo "###########        ELASTICSEARCH         ############"
+echo "#####################################################"
 case $1 in
 	run)
-	run
+		if [ -z "$2" ]
+		then
+			echo "Can't find a name of ES's instance. Specify the name of ES instance in the first parameter. For example:"
+			echo "# $0 run elasticsearch_043 9200 9300"
+			exit 1
+		fi
+		if [ -z "$3" ]
+			then
+				echo "Can't find a port number of ES's instance. Specify the port number of ES's instance in the second parameter. For example:"
+				echo "# $0 run elasticsearch_043 9200 9300"
+			exit 1
+			fi
+		if [ -z "$4" ]
+			then
+					echo "Can't find a management port number of ES's instance. Specify the management port number of ES's instance in the third parameter. For example:"
+					echo "# $0 run elasticsearch_043 9200 9300"
+			exit 1
+		fi
+		run ${@:2}
 	;;
 	stop)
 	stop
