@@ -1,5 +1,5 @@
 #!/bin/bash
-
+source ../lib/management_scripts.sh
 function suspendAll(){
         echo "Suspend all"
         docker container suspend filebeat
@@ -56,38 +56,33 @@ function statusAll(){
 
 
 case $1 in
-        runAll)
-        runAll
-        ;;
-
-        stopAll)
-        stopAll
-        ;;
-
-        statusAll)
-        statusAll
-        ;;
+	runAll)
+	runAll
+	;;
+	stopAll)
+	stopAll
+	;;
+	statusAll)
+	statusAll
+	;;
 	suspendAll)
-        suspendAll
-        ;;
+	suspendAll
+	;;
 	unsuspendAll)
-        unsuspendAll
-        ;;
+	unsuspendAll
+	;;
 	restartAll)
-        restartAll
-        ;;
-
-        *)
-        printf "Commands are:\n"
-        printf "runAll -\n"
-        printf "stopAll -\n"
-        printf "statusAll - \n"
-        printf "suspendAll -\n"
-        printf "unsuspendAll -\n"
-        printf "restartAll - \n"
-
-        ;;
-
+	restartAll
+	;;
+	*)
+	printf "Commands are:\n"
+	printf "runAll -\n"
+	printf "stopAll -\n"
+	printf "statusAll - \n"
+	printf "suspendAll -\n"
+	printf "unsuspendAll -\n"
+	printf "restartAll - \n"
+	;;
 esac
 
 

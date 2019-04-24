@@ -1,6 +1,7 @@
 #!/bin/bash
-
+source ../lib/management_scripts.sh
 container_name=logstash
+:'
 function pause(){
 	docker container pause $container_name
 }
@@ -15,21 +16,27 @@ function getContainerId(){
         pid=$(docker container ls -a | grep /logstash/logstash | awk {'print $1'})
         echo $pid
 }
-
-
-function stop(){
-	pid=$(getContainerId)
-	if [ -z "$pid" ]
-	then
-			echo "Couldn't find container id in the containers list"
-	else
-			echo "Container ID: $pid"
-			echo "Stopping container [$pid]..."
-			docker container stop $pid
-			echo "Removing container [$pid]..."
-			docker container rm $pid
-	fi
+function logs(){
+        docker logs $(getContainerId)
 }
+function shell(){
+        docker exec -it $(getContainerId) /bin/bash
+}
+'
+
+#function stop(){
+#	pid=$(getContainerId)
+#	if [ -z "$pid" ]
+#	then
+#			echo "Couldn't find container id in the containers list"
+#	else
+#			echo "Container ID: $pid"
+#			echo "Stopping container [$pid]..."
+#			docker container stop $pid
+#			echo "Removing container [$pid]..."
+#			docker container rm $pid
+#	fi
+#}
 
 function run(){
 	echo "Starting logstash container"
@@ -43,57 +50,42 @@ function run(){
 	echo
 #       -v ~/DockerExamples/logstash-filter.conf:/usr/share/logstash/config/logstash-filter.conf \
 }
-
-
-function logs(){
-        docker logs $(getContainerId)
-}
-
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
-
-
 case $1 in
-        run)
-        run
-        ;;
-
-        stop)
-        stop
-        ;;
-
-        stopAndRun)
-        stop
-        run
-        ;;
+	run)
+	run
+	;;
+	stop)
+	stop
+	;;
+	stopAndRun)
+	stop
+	run
+	;;
 	pause)
-        pause
-        ;;
-        unpause)
-        unpause
-        ;;
-        restart)
-        restart
-        ;;
-        logs)
-        logs
-        ;;
-        shell)
-        shell
-        ;;
-        *)
+	pause
+	;;
+	unpause)
+	unpause
+	;;
+	restart)
+	restart
+	;;
+	logs)
+	logs
+	;;
+	shell)
+	shell
+	;;
+	*)
 	printf "Commands are:\n"
-        printf "run - \n"
-        printf "stop - \n"
-        printf "stopAndRun - \n"
-        printf "logs - \n"
-        printf "shell - \n"
-        printf "pause - \n"
-        printf "unpause - \n"
-        printf "restart - \n"
-
-        ;;
-
+	printf "run - \n"
+	printf "stop - \n"
+	printf "stopAndRun - \n"
+	printf "logs - \n"
+	printf "shell - \n"
+	printf "pause - \n"
+	printf "unpause - \n"
+	printf "restart - \n"
+	;;
 esac
 
