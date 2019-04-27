@@ -22,7 +22,7 @@ function getContainerId(){
 
 function stop(){
 	echo "Stopping container for [$1]..." 
-        pid=$(getContainerId)
+        pid=$1
         if [ -z "$pid" ]
         then
                         echo "Couldn't find container id in the containers list"
@@ -44,4 +44,6 @@ function logs(){
 function shell(){
         docker exec -it $(getContainerId) /bin/bash
 }
-
+function status(){
+	docker container ls | grep $1
+}

@@ -1,57 +1,5 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
-container_name=filebeat
-:'
-function pause(){
-	docker container pause $container_name
-}
-function unpause(){
-	docker container unpause $container_name
-}
-function restart(){
-	docker container restart $container_name
-}
-function getContainerId(){
-	pid=$(docker container ls -a | grep /beats/filebeat | awk {'print $1'})
-	echo $pid
-}
-function logs(){
-	docker logs $(getContainerId)
-
-}
-function shell(){
-	docker exec -it $(getContainerId) /bin/bash
-}
-'
-#function stop(){
-#	echo "Getting container ID from the pid file..."
-#	pid=$(cat filebeat.pid)
-#	if [ -z "$pid" ]
-#	then
-#			echo "Couldn't find container id in the pid file"
-#
-#	else
-#			echo "Container ID: $pid"
-#			echo "Stopping container [$pid]..."
-#			docker container stop $pid
-#			echo "Removing container [$pid]..."
-#			docker container rm $pid
-#	fi
-#	
-	#pid=$(docker container ls -a | grep /beats/filebeat | awk {'print $1'})
-#	pid=$(getContainerId)
-#	if [ -z "$pid" ]
-#	then
-#			echo "Can't find container id in the containers list"
-#	else
-#			echo "Container ID: $pid"
-#			echo "Stopping container [$pid]..."
-#			docker container stop $pid
-#			echo "Removing container [$pid]..."
-#			docker container rm $pid
-#	fi
-#}
-
 
 function run(){
 	# Pull image
@@ -91,26 +39,26 @@ case $1 in
 		run ${@:2}
 	;;
 	stop)
-	stop
+	stop $1
 	;;
 	stopAndRun)
-	stop
-	start
+	stop $1
+	start $1
 	;;
 	pause)
-	pause
+	pause $1
 	;;
 	unpause)
-	unpause
+	unpause $1
 	;;
 	restart)
-	restart
+	restart $1
 	;;	
 	logs)
-	logs
+	logs $1
 	;;
 	shell)
-	shell
+	shell $1
 	;;
 	*)
 	printf "Commands are:\n"

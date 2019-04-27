@@ -1,47 +1,42 @@
 #!/bin/bash
 # https://www.outcoldsolutions.com/docs/monitoring-docker/v5/installation/
 source ../lib/management_scripts.sh
-container_name=collectorfordocker
-image_name=outcoldsolutions/collectorfordocker
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep $container_name | awk {'print $1'})
-        echo $pid
+IMAGE_NAME=outcoldsolutions/collectorfordocker
+function show_commandline_parameters_run(){
+ 	echo "Example of commandline parameters for the run command:"
+        echo "# $0 run collectorfordocker <license string> splunkhost <hec token hash>"	
 }
-
-function stop(){
-        pid=$(getContainerId)
-        if [ -z "$pid" ]
-        then
-                        echo "Couldn't find container id in the containers list"
-        else
-                        echo "Container ID: $pid"
-                        echo "Stopping container [$pid]..."
-                        docker container stop $pid
-                        echo "Removing container [$pid]..."
-                        docker container rm $pid
-        fi
-}
-
 function run(){
 	
-	echo "Running container [$container_name] from image [$image_name] "
-	license=$1
-	hec_token=$2
+	echo "Running container [$1] from image [$IMAGE_NAME] "
+	container_name=$1
+	license=$2
+	splunk_host_name=$3
+	hec_token=$4
+	if [ -z "$container_name" ]
+        then
+                echo "Can't find collectorfordocker container name"
+                show_commandline_parameters_run
+                exit 1
+        fi
+	if [ -z "$splunk_host_name" ]
+        then
+                echo "Can't find splunk's host name"
+                show_commandline_parameters_run
+                exit 1
+        fi
+
 	if [ -z "$license" ]
 	then
-		echo "Can't find license of collectd. Example:"
-		echo "# $0 license_value "
-		return	
-	else
-		echo "License is [$license]"
+		echo "Can't find license of collectd"
+		show_commandline_parameters_run
+		exit 1
 	fi
 	if [ -z "$hec_token" ]
         then
                 echo "Can't find hec_token of splunk"
-                return
-        else
-                echo "HEC token is [$hec_token]"
+		show_commandline_parameters_run
+		exit 1
         fi
 		docker run -d \
     		--name $container_name \
@@ -56,48 +51,42 @@ function run(){
     		--cpu-shares=204 \
     		--memory=256M \
     		--restart=always \
-    		--env "COLLECTOR__SPLUNK_URL=output.splunk__url=https://splunk:8088/services/collector/event/1.0" \
+    		--env "COLLECTOR__SPLUNK_URL=output.splunk__url=https://$splunk_host_name:8088/services/collector/event/1.0" \
     		--env "COLLECTOR__SPLUNK_TOKEN=output.splunk__token=$hec_token"  \
     		--env "COLLECTOR__SPLUNK_INSECURE=output.splunk__insecure=true"  \
     		--env "COLLECTOR__EULA=general__acceptEULA=true" \
     		--env "COLLECTOR__LICENSE=general__license=$license" \
     		--privileged \
-    		$image_name:5.7.220
+    		$IMAGE_NAME:5.7.220
 }
 
-function logs(){
-        docker logs $(getContainerId)
-}
 
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
 
 case $1 in
         run)
         	run ${@:2} 
         ;;
         stop)
-        stop
+        stop $1
         ;;
         stopAndRun)
-        stop
-        start
+        stop $1
+        run $1
         ;;
         suspend)
-        suspend $container_name
+        suspend $1
         ;;
         unsuspend)
-        unsuspend $container_name
+        unsuspend $1
         ;;
         restart)
-        restart $container_name
+        restart $1
         ;;
         logs)
-        logs
+        logs $1
         ;;
         shell)
-        shell
+        shell $1
         ;;
         *)
         printf "Commands are:\n"
@@ -109,7 +98,7 @@ case $1 in
         printf "shell - \n"
 	printf "pause - \n"
         printf "unpause - \n"
-	echo "run <license> <splunk_hec_token>"
+	echo "run "
         ;;
 esac
 

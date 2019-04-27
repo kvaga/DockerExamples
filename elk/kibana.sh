@@ -1,56 +1,16 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
 
-container_name=kibana
-:'
-function pause(){
-	docker container pause $container_name
-}
-function unpause(){
-	docker container unpause $container_name
-}
-function restart(){
-	docker container restart $container_name
-}
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep /kibana/kibana | awk {'print $1'})
-        echo $pid
-}
-function logs(){
-        docker logs $(getContainerId)
-}
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
-
-'
-#function stop(){
-#        pid=$(getContainerId)
-#        if [ -z "$pid" ]
-#        then
-#                        echo "Couldn't find container id in the containers list"
-#        else
-#                        echo "Container ID: $pid"
-#                        echo "Stopping container [$pid]..."
-#                        docker container stop $pid
-#                        echo "Removing container [$pid]..."
-#                        docker container rm $pid
-#        fi
-#}
-
 function getESContainerId(){
-	pidES=$(docker container ls -a | grep /elasticsearch/elasticsearch | awk {'print $1'})
+	pidES=$(docker container ls -a | grep $1 | awk {'print $1'})
 	echo $pidES
 }
 
-
 function run(){
-	elasticsearch_container_id=$(getESContainerId)
+	elasticsearch_container_id=$(getESContainerId $3)
         echo "Starting Kibana for ES [$elasticsearch_container_id]"
         docker run \
 		--link $elasticsearch_container_id:elasticsearch \
-		--rm \
 		--name $1 \
 		--network elk_network \
 		-p $2:$2 \
@@ -83,26 +43,26 @@ case $1 in
 		run ${@:2}
 	;;
 	stop)
-	stop
+	stop $1
 	;;
 	stopAndRun)
-	stop
-	start
+	stop $1
+	start $1
 	;;
 	pause)
-	pause
+	pause $1
 	;;
 	unpause)
-	unpause
+	unpause $1
 	;;
 	restart)
-	restart
+	restart $1
 	;;
 	logs)
-	logs
+	logs $1
 	;;
 	shell)
-	shell
+	shell $1
 	;;
 	*)
 	printf "Commands are:\n"

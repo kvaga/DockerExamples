@@ -1,40 +1,12 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
-container_name=splunk
-image_name=splunk/splunk
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep $container_name | awk {'print $1'})
-        echo $pid
-}
-
-function stop(){
-        pid=$(getContainerId)
-        if [ -z "$pid" ]
-        then
-                        echo "Couldn't find container id in the containers list"
-        else
-                        echo "Container ID: $pid"
-                        echo "Stopping container [$pid]..."
-                        docker container stop $pid
-                        echo "Removing container [$pid]..."
-                        docker container rm $pid
-        fi
-}
+IMAGE_NAME=splunk/splunk
 
 function run(){
-	echo "Running container [$container_name]  from image [$image_name] with password [$1]"
-	docker run -d -p 8000:8000 -e "SPLUNK_START_ARGS=--accept-license" -e "SPLUNK_PASSWORD=$1" --name $container_name \
+	echo "Running container [$1]  from image [$IMAGE_NAME] with password [$1]"
+	docker run -d -p $3:$3 -e "SPLUNK_START_ARGS=--accept-license" -e "SPLUNK_PASSWORD=$2" --name $1 \
 	--network common_network\
-	$image_name:latest
-}
-
-function logs(){
-        docker logs $(getContainerId)
-}
-
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
+	$IMAGE_NAME:latest
 }
 
 function check_hec(){
@@ -42,42 +14,59 @@ function check_hec(){
 	if [ -z "$1" ]
         then
                 echo "You must specify a HEC hash value"
-		return
+		exit 1
         fi
 	curl -k https://$container_name:8089/services/collector/event/1.0 -H "Authorization: Splunk $1" -d '{"event": "hello world"}'
 }
+function show_commandline_parameters_run(){
+	echo "Example of commandline parameters for the run command:"
+	echo "# $0 run splunk secret 8000"
+}
 case $1 in
         run)
-	if [ -z "$2" ]
+	 if [ -z "$2" ]
+        then
+                echo "You must specify a name of splunk's container name for the newly created splunk instance"
+                show_commandline_parameters_run
+                exit 1
+        fi
+
+	if [ -z "$3" ]
 	then
 		echo "You must specify a password for the newly created splunk instance"
-		echo "For example:"
-		echo "# $0 run secret"
-	else	
-        	run $2 
+		show_commandline_parameters_run
+		exit 1
 	fi
+	if [ -z "$4" ]
+        then
+                echo "You must specify a port number for the newly created splunk instance"
+		show_commandline_parameters_run
+                exit 1
+        fi
+	
+	run ${@:2}
         ;;
         stop)
-        stop
+        stop $1
         ;;
         stopAndRun)
-        stop
-        start
+        stop $1
+        run ${@:2}
         ;;
         suspend)
-        suspend $container_name
+        suspend $1
         ;;
         unsuspend)
-        unsuspend $container_name
+        unsuspend $1
         ;;
         restart)
-        restart $container_name
+        restart $1
         ;;
         logs)
-        logs
+        logs $1
         ;;
         shell)
-        shell
+        shell $1
         ;;
 	check_hec)
 	check_hec ${@:2}

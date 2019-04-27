@@ -1,32 +1,5 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
-container_name=elasticsearch
-
-: '
-function pause(){
-	docker container pause $container_name
-}
-function unpause(){
-	docker container unpause $container_name
-}
-function restart(){
-	docker container restart $container_name
-}
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep /elasticsearch/elasticsearch | awk {'print $1'})
-        echo $pid
-}
-function logs(){
-        docker logs $(getContainerId)
-}
-
-
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
-
-'
 
 #function stop(){
 #        pid=$(getContainerId)
@@ -42,11 +15,9 @@ function shell(){
 #        fi
 #}
 
-
-
 function run(){
         echo "Starting elasticsearch container"
-        docker run --rm \
+        docker run \
 		-p $2:$2 -p $3:$3 \
 		-e "discovery.type=single-node" \
 		--name $1 \
@@ -80,26 +51,26 @@ case $1 in
 		run ${@:2}
 	;;
 	stop)
-	stop
+	stop $1
 	;;
 	stopAndRun)
-	stop
-	run
+	stop $1
+	run $1
 	;;
 	pause)
-	pause
+	pause $1
 	;;
 	unpause)
-	unpause
+	unpause $1
 	;;
 	restart)
-	restart
+	restart $1
 	;;
 	logs)
-	logs
+	logs $1
 	;;
 	shell)
-	shell
+	shell $1
 	;;
 	*)
 	printf "Commands are:\n"

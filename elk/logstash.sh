@@ -1,50 +1,13 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
-container_name=logstash
-:'
-function pause(){
-	docker container pause $container_name
-}
-function unpause(){
-	docker container unpause $container_name
-}
-function restart(){
-	docker container restart $container_name
-}
-
-function getContainerId(){
-        pid=$(docker container ls -a | grep /logstash/logstash | awk {'print $1'})
-        echo $pid
-}
-function logs(){
-        docker logs $(getContainerId)
-}
-function shell(){
-        docker exec -it $(getContainerId) /bin/bash
-}
-'
-
-#function stop(){
-#	pid=$(getContainerId)
-#	if [ -z "$pid" ]
-#	then
-#			echo "Couldn't find container id in the containers list"
-#	else
-#			echo "Container ID: $pid"
-#			echo "Stopping container [$pid]..."
-#			docker container stop $pid
-#			echo "Removing container [$pid]..."
-#			docker container rm $pid
-#	fi
-#}
 
 function run(){
 	echo "Starting logstash container"
 	docker run --name $1 \
-	--rm -it \
+	-i \
 	-v $(pwd)/logstash.yml:/usr/share/logstash/config/logstash.yml \
     -v $(pwd)/logstash.conf:/usr/share/logstash/config/logstash.conf \
-	-p 9600:9600 -p 5044:5044 \
+	-p $2:$2 -p $3:$3 \
 	--network elk_network \
 	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf --config.reload.automatic
 	echo
@@ -76,26 +39,26 @@ case $1 in
 		run ${@:2}
 	;;
 	stop)
-	stop
+	stop $1
 	;;
 	stopAndRun)
-	stop
-	run
+	stop $1
+	run $1
 	;;
 	pause)
-	pause
+	pause $1
 	;;
 	unpause)
-	unpause
+	unpause $1
 	;;
 	restart)
-	restart
+	restart $1
 	;;
 	logs)
-	logs
+	logs $1
 	;;
 	shell)
-	shell
+	shell $1
 	;;
 	*)
 	printf "Commands are:\n"
