@@ -51,7 +51,7 @@ function run(){
     		--cpu-shares=204 \
     		--memory=256M \
     		--restart=always \
-    		--env "COLLECTOR__SPLUNK_URL=output.splunk__url=https://$splunk_host_name:8088/services/collector/event/1.0" \
+    		--env "COLLECTOR__SPLUNK_URL=output.splunk__url=https://$splunk_host_name:8089/services/collector/event/1.0" \
     		--env "COLLECTOR__SPLUNK_TOKEN=output.splunk__token=$hec_token"  \
     		--env "COLLECTOR__SPLUNK_INSECURE=output.splunk__insecure=true"  \
     		--env "COLLECTOR__EULA=general__acceptEULA=true" \
@@ -67,26 +67,26 @@ case $1 in
         	run ${@:2} 
         ;;
         stop)
-        stop $1
+        stop $2
         ;;
         stopAndRun)
-        stop $1
-        run $1
+        stop $2
+        run $2
         ;;
         suspend)
-        suspend $1
+        suspend $2
         ;;
         unsuspend)
-        unsuspend $1
+        unsuspend $2
         ;;
         restart)
-        restart $1
+        restart $2
         ;;
         logs)
-        logs $1
+        logs $2
         ;;
         shell)
-        shell $1
+        shell $2
         ;;
         *)
         printf "Commands are:\n"

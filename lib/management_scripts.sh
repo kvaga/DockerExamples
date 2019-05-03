@@ -37,12 +37,12 @@ function stop(){
 
 
 function logs(){
-        docker logs $(getContainerId)
+        docker logs $(getContainerId $1)
 }
 
 
 function shell(){
-        docker exec -it $(getContainerId) /bin/bash
+        docker exec -it $(getContainerId $1) /bin/bash
 }
 function status(){
 	docker container ls | grep $1

@@ -47,26 +47,26 @@ case $1 in
 	run ${@:2}
         ;;
         stop)
-        stop $1
+        stop $2
         ;;
         stopAndRun)
-        stop $1
+        stop $2
         run ${@:2}
         ;;
         suspend)
-        suspend $1
+        suspend $2
         ;;
         unsuspend)
-        unsuspend $1
+        unsuspend $2
         ;;
         restart)
-        restart $1
+        restart $2
         ;;
         logs)
-        logs $1
+        logs $2
         ;;
         shell)
-        shell $1
+        shell $2
         ;;
 	check_hec)
 	check_hec ${@:2}

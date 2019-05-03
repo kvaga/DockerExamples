@@ -27,11 +27,11 @@ case $1 in
         suspend $COLLECTORD_CONTAINER_NAME
 	suspend $SPLUNK_CONTAINER_NAME
         ;;
-        unsuspend)
+        unsuspendAll)
         unsuspend $COLLECTORD_CONTAINER_NAME
 	unsuspend $SPLUNK_CONTAINER_NAME
         ;;
-        restart)
+        restartAll)
         restart $SPLUNK_CONTAINER_NAME
 	restart $COLLECTORD_CONTAINER_NAME
         ;;
@@ -46,5 +46,7 @@ case $1 in
         printf "restartAll - \n"
 	echo "suspendAll -"
 	echo "unsuspendAll -"
+	echo "statusAll - "
+
 
 esac
