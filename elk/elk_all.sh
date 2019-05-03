@@ -10,20 +10,20 @@ LOGSTASH_CONTAINER_NAME=logstash
 LOGSTSH_API_PORT=9600
 LOGSTASH_PORT=5044
 
-function suspendAll(){
-        echo "Suspend all"
-        suspend $FILEBEAT_CONTAINER_NAME
-        suspend $LOGSTASH_CONTAINER_NAME
-        suspend $KIBANA_CONTAINER_NAME
-        suspend $ELASTICSEARCH_CONTAINER_NAME
+function pauseAll(){
+        echo "Pause all"
+        pause $FILEBEAT_CONTAINER_NAME
+        pause $LOGSTASH_CONTAINER_NAME
+        pause $KIBANA_CONTAINER_NAME
+        pause $ELASTICSEARCH_CONTAINER_NAME
 }
 
-function unsuspendAll(){
-        echo "Unsuspend all"
-	unsuspend $ELASTICSEARCH_CONTAINER_NAME
-        unsuspend $FILEBEAT_CONTAINER_NAME
-        unsuspend $LOGSTASH_CONTAINER_NAME
-        unsuspend $KIBANA_CONTAINER_NAME
+function unpauseAll(){
+        echo "Unpause all"
+	unpause $ELASTICSEARCH_CONTAINER_NAME
+        unpause $FILEBEAT_CONTAINER_NAME
+        unpause $LOGSTASH_CONTAINER_NAME
+        unpause $KIBANA_CONTAINER_NAME
 }
 
 function restartAll(){
@@ -81,11 +81,11 @@ case $1 in
 	stopAll)
 	stopAll
 	;;
-	suspendAll)
-	suspendAll
+	pauseAll)
+	pauseAll
 	;;
-	unsuspendAll)
-	unsuspendAll
+	unpauseAll)
+	unpauseAll
 	;;
 	restartAll)
 	restartAll
@@ -98,8 +98,8 @@ case $1 in
 	printf "runAll -\n"
 	printf "stopAll -\n"
 	printf "statusAll - \n"
-	printf "suspendAll -\n"
-	printf "unsuspendAll -\n"
+	printf "pauseAll -\n"
+	printf "unpauseAll -\n"
 	printf "restartAll - \n"
 	;;
 esac
