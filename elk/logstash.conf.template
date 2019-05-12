@@ -1,0 +1,21 @@
+input {
+  beats {
+    port => 5044
+    host => "0.0.0.0"
+  }
+}
+
+filter {
+  if [qqq] == "qwerty" {
+	grok {
+		match => {"message" => "%{YEAR}:%{MONTHNUM}:%{MONTHDAY} %{TIME} (?<SOME_TEXT>.+) T=%{NUMBER:ttt:int}"}
+
+	}
+      mutate {
+        add_field => { "my_new_field" => "my_new_value" }
+  	}
+	
+  }
+}
+
+

@@ -1,0 +1,2 @@
+xpack.monitoring.elasticsearch.hosts: elasticsearchtest:9203
+xpack.monitoring.enabled: true

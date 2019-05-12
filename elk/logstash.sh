@@ -1,17 +1,76 @@
 #!/bin/bash
 source ../lib/management_scripts.sh
 
+function prepareYmlConfig(){
+	echo "Preparing yml config file for the logstash instance..."
+	if [ -z "$1" ]
+        then
+                echo "Yml config file name is empty for the logstash instance"
+                exit 1
+        fi
+	if [ -z "$2" ]
+        then
+                echo "ES_URL is empty"
+                exit 1
+        fi
+	YML_CONFIG=$1
+	ES_URL=$2
+	echo "xpack.monitoring.elasticsearch.hosts: $ES_URL" > $YML_CONFIG
+	echo "xpack.monitoring.enabled: true" >> $YML_CONFIG
+	echo "Yml file is ready:"
+	cat $YML_CONFIG
+}
+prepareConfig(){
+	echo "Preparing config file for the logstash instance..."
+        TEMPLATE_CONFIG=logstash.conf.template; echo TEMPLATE_CONFIG=$TEMPLATE_CONFIG
+	CONFIG_FILE_NAME=$1; echo CONFIG_FILE_NAME=$CONFIG_FILE_NAME
+	ES_URL=$2; echo ES_URL=$ES_URL
+	if [ -z "$CONFIG_FILE_NAME" ]
+        then
+                echo "Config file name is empty for the logstash instance"
+                exit 1
+        fi
+	if [ -z "$ES_URL" ]
+        then
+                echo "ES URL is empty. Specify ES URL instance"
+                exit 1
+        fi
+
+	cat $TEMPLATE_CONFIG > $CONFIG_FILE_NAME
+	echo "" >> $CONFIG_FILE_NAME
+	echo "output {" >> $CONFIG_FILE_NAME
+  	echo "	elasticsearch {" >> $CONFIG_FILE_NAME
+    	echo "		hosts => [\"$ES_URL\"]" >> $CONFIG_FILE_NAME
+    	echo "		manage_template => false" >> $CONFIG_FILE_NAME
+   	echo "		index => \"%{[@metadata][beat]}-%{[@metadata][version]}-%{+YYYY.MM.dd}\"" >> $CONFIG_FILE_NAME
+  	echo "	}" >> $CONFIG_FILE_NAME
+	echo "}" >> $CONFIG_FILE_NAME
+	echo "Content of the [$CONFIG_FILE_NAME] is:"
+	cat $CONFIG_FILE_NAME
+	echo ""
+}
+
 function run(){
-	echo "Starting logstash container"
-	docker run --name $1 \
+	echo "Starting logstash container..."
+	echo "Parameters:"
+	LOGSTASH_INSTANCE_NAME=$1; echo LOGSTASH_INSTANCE_NAME=$LOGSTASH_INSTANCE_NAME
+	YML_LOGSTASH_CONFIG=$1.logstash.yml; echo YML_LOGSTASH_CONFIG=$YML_LOGSTASH_CONFIG
+	LOGSTASH_CONFIG=$1.logstash.conf
+	ES_URL=$4; echo ES_URL=$ES_URL
+	echo 
+	prepareYmlConfig $YML_LOGSTASH_CONFIG $ES_URL 
+	prepareConfig $LOGSTASH_CONFIG $ES_URL
+	docker run --name $LOGSTASH_INSTANCE_NAME \
 	-i \
-	-v $(pwd)/logstash.yml:/usr/share/logstash/config/logstash.yml \
-    -v $(pwd)/logstash.conf:/usr/share/logstash/config/logstash.conf \
-	-p $2:$2 -p $3:$3 \
+ 	-v $(pwd)/$YML_LOGSTASH_CONFIG:/usr/share/logstash/config/logstash.yml \
+    	-v $(pwd)/$LOGSTASH_CONFIG:/usr/share/logstash/config/logstash.conf \
+	-p $2:9600 \
+	-p $3:5044 \
 	--network elk_network \
 	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf --config.reload.automatic
 	echo
 #       -v ~/DockerExamples/logstash-filter.conf:/usr/share/logstash/config/logstash-filter.conf \
+#	 -e 'output { elasticsearch { hosts => "${ES_URL}" } }' \
 }
 echo "#####################################################"
 echo "###############        LOGSTASH          ############"
@@ -32,33 +91,39 @@ case $1 in
 	fi
 	if [ -z "$4" ]
 	then
-		echo "Can't find a management port number of Logstash's instance. Specify the management port number of Logstash's instance in the second parameter. For example:"
+		echo "Can't find a management port number of Logstash's instance. Specify the management port number of Logstash's instance in the third parameter. For example:"
 		echo "# $0 run logstash_043 9600 5044"
 		exit 1
 	fi
+	if [ -z "$5" ]
+        then
+                echo "Can't find the URL of the ES instance. Specify the URL in the fourth parameter. For example:"
+                echo "# $0 run logstash_043 9600 5044 http://elasticsearch:9200"
+                exit 1
+        fi
 		run ${@:2}
 	;;
 	stop)
-	stop $1
+	stop $2
 	;;
 	stopAndRun)
-	stop $1
-	run $1
+	stop $2
+	run $2
 	;;
 	pause)
-	pause $1
+	pause $2
 	;;
 	unpause)
-	unpause $1
+	unpause $2
 	;;
 	restart)
-	restart $1
+	restart $2
 	;;
 	logs)
-	logs $1
+	logs $2
 	;;
 	shell)
-	shell $1
+	shell $2
 	;;
 	*)
 	printf "Commands are:\n"

@@ -1,0 +1,4 @@
+#xpack.monitoring.elasticsearch.hosts: http:/$ELASTICSEARCH_CONTAINER_NAME:$ELASTICSEARCH_PORT
+#xpack.monitoring.elasticsearch.hosts: http://elasticsearch:9200
+xpack.monitoring.enabled: true
+

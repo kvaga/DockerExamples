@@ -7,13 +7,18 @@ function getESContainerId(){
 }
 
 function run(){
+	# change port number through the Environment Variables is possible by the key: -e SERVER_PORT=$2 \
 	elasticsearch_container_id=$(getESContainerId $3)
-        echo "Starting Kibana for ES [$elasticsearch_container_id]"
-        docker run \
+        echo "Starting Kibana for ES [$elasticsearch_container_id]..."
+	echo "Parameters:"
+	echo KIBANA_CONTAINER_NAME=$1
+	echo KIBANA_PORT=$2
+        echo
+	docker run \
 		--link $elasticsearch_container_id:elasticsearch \
 		--name $1 \
 		--network elk_network \
-		-p $2:$2 \
+		-p $2:5601 \
 		docker.elastic.co/kibana/kibana:6.7.1
 }
 echo "#####################################################"
@@ -43,26 +48,26 @@ case $1 in
 		run ${@:2}
 	;;
 	stop)
-	stop $1
+	stop $2
 	;;
 	stopAndRun)
-	stop $1
-	start $1
+	stop $2
+	start $2
 	;;
 	pause)
-	pause $1
+	pause $2
 	;;
 	unpause)
-	unpause $1
+	unpause $2
 	;;
 	restart)
-	restart $1
+	restart $2
 	;;
 	logs)
-	logs $1
+	logs $2
 	;;
 	shell)
-	shell $1
+	shell $2
 	;;
 	*)
 	printf "Commands are:\n"

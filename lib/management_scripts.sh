@@ -1,10 +1,10 @@
 #!/bin/bash
 
-function suspend(){
+function pause(){
 	echo "Suspending container [$1]..."
 	docker container pause $1
 }
-function unsuspend(){
+function unpause(){
 	echo "Unsuspending container [$1]..."
 	docker container unpause $1
 }

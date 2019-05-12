@@ -1,14 +1,15 @@
 #!/bin/bash
+
 source ../lib/management_scripts.sh
-FILEBEAT_CONTAINER_NAME=filebeat
-KIBANA_CONTAINER_NAME=kibana
-KIBANA_PORT=5601
-ELASTICSEARCH_CONTAINER_NAME=elasticsearch
-ELASTICSEARCH_PORT=9200
-ELASTICSEARCH_MGMT_PORT=9300
-LOGSTASH_CONTAINER_NAME=logstash
-LOGSTSH_API_PORT=9600
-LOGSTASH_PORT=5044
+FILEBEAT_CONTAINER_NAME=filebeat_test
+KIBANA_CONTAINER_NAME=kibana_test
+KIBANA_PORT=5605
+ELASTICSEARCH_CONTAINER_NAME=elasticsearchtest
+ELASTICSEARCH_PORT=9203
+ELASTICSEARCH_MGMT_PORT=9303
+LOGSTASH_CONTAINER_NAME=logstash_test
+LOGSTSH_API_PORT=9603
+LOGSTASH_PORT=5047
 
 function pauseAll(){
         echo "Pause all"
@@ -52,13 +53,13 @@ function runAll(){
 	./elasticsearch.sh run $ELASTICSEARCH_CONTAINER_NAME $ELASTICSEARCH_PORT $ELASTICSEARCH_MGMT_PORT & 
 	echo "Sleeping for 120 seconds before starting of Logstash"
         sleep 120
-        ./logstash.sh run $LOGSTASH_CONTAINER_NAME $LOGSTSH_API_PORT $LOGSTASH_PORT& 
+        ./logstash.sh run $LOGSTASH_CONTAINER_NAME $LOGSTSH_API_PORT $LOGSTASH_PORT http://$ELASTICSEARCH_CONTAINER_NAME:$ELASTICSEARCH_PORT & 
 	echo "Sleeping for 180 seconds before starting of Kibana" 
 	sleep 180
 	./kibana.sh run $KIBANA_CONTAINER_NAME $KIBANA_PORT $ELASTICSEARCH_CONTAINER_NAME &
 	echo "Sleeping for 120 seconds before starting of Filebeat"
 	sleep 120
-	./filebeat.sh run $FILEBEAT_CONTAINER_NAME &
+	./filebeat.sh run $FILEBEAT_CONTAINER_NAME $ELASTICSEARCH_CONTAINER_NAME:$ELASTICSEARCH_PORT &
 }
 function statusAll(){
 	echo

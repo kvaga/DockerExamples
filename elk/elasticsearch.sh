@@ -16,9 +16,15 @@ source ../lib/management_scripts.sh
 #}
 
 function run(){
-        echo "Starting elasticsearch container"
-        docker run \
-		-p $2:$2 -p $3:$3 \
+        echo "Starting elasticsearch container..."
+	echo "Parameters:"
+	echo ELASTICSEARCH_CONTAINER_NAME=$1
+	echo ELASTICSEARCH_PORT=$2
+	echo ELASTICSEARCH_MGMT_PORT=$3
+        echo
+	docker run \
+		-p $2:9200 \
+		-p $3:9300 \
 		-e "discovery.type=single-node" \
 		--name $1 \
 		--network elk_network \
