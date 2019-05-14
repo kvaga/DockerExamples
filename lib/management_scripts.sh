@@ -35,7 +35,17 @@ function stop(){
         fi
 }
 
-
+function createNetwirk(){
+	NETWORK_NAME=$1
+	if [ -z "$NETWORK_NAME" ]
+	then
+		echo "Network name is empty"
+		exit 1
+	fi
+	docker network create $NETWORK_NAME
+	docker network list
+	docker network inspect $NETWORK_NAME
+}
 function logs(){
         docker logs $(getContainerId $1)
 }
@@ -46,4 +56,11 @@ function shell(){
 }
 function status(){
 	docker container ls | grep $1
+}
+function insertParameter(){
+	FILE=$1
+	FROM=$2
+	TO=$3
+	echo sed -i -e "s/$FROM/$TO/" $FILE
+	sed -i -e "s,$FROM,$TO,g" $FILE
 }
