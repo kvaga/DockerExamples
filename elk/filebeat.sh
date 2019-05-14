@@ -13,25 +13,34 @@ function run(){
 	#-E output.elasticsearch.hosts=["elasticsearch:9200"]
 
 	echo "Starting filebeat container..."
+	
 	echo "Parameters:"
-	echo FILEBEAT_CONTAINER_NAME=$1
-	echo LOGSTASH_INSTANCE_URL=$2
+	FILEBEAT_CONTAINER_NAME=$1; echo FILEBEAT_CONTAINER_NAME=$FILEBEAT_CONTAINER_NAME
+	LOGSTASH_INSTANCE_URL=$2; echo LOGSTASH_INSTANCE_URL=$LOGSTASH_INSTANCE_URL
+	YML_TEMPLATE=filebeat.yml.template; echo YML_TEMPLATE=$YML_TEMPLATE
+	YML_CONFIG_FILE=$FILEBEAT_CONTAINER_NAME.filebeat.yml; echo YML_CONFIG_FILE=$YML_CONFIG_FILE
+	echo "Preparing YML config file"
+	cp $YML_TEMPLATE $YML_CONFIG_FILE
+	insertParameter $YML_CONFIG_FILE %LOGSTASH_URL% $LOGSTASH_INSTANCE_URL
+	
+	echo "The [$YML_CONFIG_FILE] is:"
+	cat $YML_CONFIG_FILE
 	echo 
+	
 	docker run -d \
-	-e OUTPUT_LOGSTASH_ENABLED='true' \
-	-e OUTPUT_LOGSTASH_HOSTS='logstash:5044' \
-	  --name=$1 \
+	  --name=$FILEBEAT_CONTAINER_NAME \
 	  --user=root \
 	  --network elk_network \
-	  --volume="$(pwd)/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro" \
+	  --volume="$(pwd)/$YML_CONFIG_FILE:/usr/share/filebeat/filebeat.yml:ro" \
 	  --volume="/var/lib/docker/containers:/var/lib/docker/containers:ro" \
 	  --volume="/var/run/docker.sock:/var/run/docker.sock:ro" \
 	  --mount type=volume,dst=/opt/elk_filebeat_vol,volume-driver=local,volume-opt=type=none,volume-opt=o=bind,volume-opt=device=/opt/docker_volumes/filebeat_vol/ \
 	  docker.elastic.co/beats/filebeat:6.7.1 filebeat -e -strict.perms=false  \
-        -E output.logstash.hosts=logstash_test:5044 \
-         > filebeat.pid
 	#docker.elastic.co/beats/filebeat:6.7.1 filebeat -e -strict.perms=false \
 	echo
+#-e OUTPUT_LOGSTASH_ENABLED='true' \
+#-e OUTPUT_LOGSTASH_HOSTS='$LOGSTASH_INSTANCE_URL' \
+# -E output.logstash.hosts=$LOGSTASH_INSTANCE_URL
 }
 echo "#####################################################"
 echo "###############        FILEBEAT          ############"

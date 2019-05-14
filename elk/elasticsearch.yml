@@ -1,0 +1,5 @@
+http.port: %ELASTICSEARCH_HTTP_PORT%
+transport.tcp.port: %ELASTICSEARCH_TCP_PORT%
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+

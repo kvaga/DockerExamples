@@ -14,22 +14,38 @@ source ../lib/management_scripts.sh
 #                        docker container rm $pid
 #        fi
 #}
-
+prepareYmlFile(){
+	ES_YML_TEMPLATE=$1
+	ES_YML_FILE=$2
+	ELASTICSEARCH_HTTP_PORT=$3
+	ELASTICSEARCH_TCP_PORT=$4
+	cp $ES_YML_TEMPLATE $ES_YML_FILE
+	sed -i -e "s/%ELASTICSEARCH_HTTP_PORT%/$ELASTICSEARCH_HTTP_PORT/" $ES_YML_FILE
+	sed -i -e "s/%ELASTICSEARCH_TCP_PORT%/$ELASTICSEARCH_TCP_PORT/" $ES_YML_FILE
+	echo "ES Yml file is:"
+	cat $ES_YML_FILE
+}
 function run(){
         echo "Starting elasticsearch container..."
 	echo "Parameters:"
-	echo ELASTICSEARCH_CONTAINER_NAME=$1
-	echo ELASTICSEARCH_PORT=$2
-	echo ELASTICSEARCH_MGMT_PORT=$3
+	ELASTICSEARCH_CONTAINER_NAME=$1; echo ELASTICSEARCH_CONTAINER_NAME=$ELASTICSEARCH_CONTAINER_NAME
+	ELASTICSEARCH_HTTP_PORT=$2; echo ELASTICSEARCH_HTTP_PORT=$ELASTICSEARCH_HTTP_PORT
+	ELASTICSEARCH_TCP_PORT=$3; echo ELASTICSEARCH_TCP_PORT=$ELASTICSEARCH_TCP_PORT
+	ES_YML_TEMPLATE=elasticsearch.yml; ES_YML_TEMPLATE=$ES_YML_TEMPLATE
+	ES_YML_FILE=$ELASTICSEARCH_CONTAINER_NAME.$ES_YML_TEMPLATE; echo ES_YML_FILE=$ES_YML_FILE
+	prepareYmlFile $ES_YML_TEMPLATE $ES_YML_FILE $ELASTICSEARCH_HTTP_PORT $ELASTICSEARCH_TCP_PORT 
         echo
 	docker run \
-		-p $2:9200 \
-		-p $3:9300 \
+		-p $2:$2 \
+		-p $3:$3 \
+		-v $(pwd)/$ES_YML_FILE:/usr/share/elasticsearch/config/elasticsearch.yml \
 		-e "discovery.type=single-node" \
 		--name $1 \
 		--network elk_network \
 		docker.elastic.co/elasticsearch/elasticsearch:6.7.1
         echo
+#-p $2:9200 \
+#-p $3:9300 \
 }
 echo "#####################################################"
 echo "###########        ELASTICSEARCH         ############"
@@ -44,39 +60,39 @@ case $1 in
 		fi
 		if [ -z "$3" ]
 			then
-				echo "Can't find a port number of ES's instance. Specify the port number of ES's instance in the second parameter. For example:"
+				echo "Can't find a HTTP port number of ES's instance. Specify the HTTP port number of ES's instance in the second parameter. For example:"
 				echo "# $0 run elasticsearch_043 9200 9300"
 			exit 1
 			fi
 		if [ -z "$4" ]
 			then
-					echo "Can't find a management port number of ES's instance. Specify the management port number of ES's instance in the third parameter. For example:"
-					echo "# $0 run elasticsearch_043 9200 9300"
+				echo "Cann't find TCP port number of ES's instance. Specify the TCP port number of ES's instance in the third parameter. For example:"
+				echo "# $0 run elasticsearch_043 9200 9300"
 			exit 1
 		fi
 		run ${@:2}
 	;;
 	stop)
-	stop $1
+	stop $2
 	;;
 	stopAndRun)
-	stop $1
-	run $1
+	stop $2
+	run $2
 	;;
 	pause)
-	pause $1
+	pause $2
 	;;
 	unpause)
-	unpause $1
+	unpause $2
 	;;
 	restart)
-	restart $1
+	restart $2
 	;;
 	logs)
-	logs $1
+	logs $2
 	;;
 	shell)
-	shell $1
+	shell $2
 	;;
 	*)
 	printf "Commands are:\n"

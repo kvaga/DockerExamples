@@ -25,6 +25,7 @@ prepareConfig(){
         TEMPLATE_CONFIG=logstash.conf.template; echo TEMPLATE_CONFIG=$TEMPLATE_CONFIG
 	CONFIG_FILE_NAME=$1; echo CONFIG_FILE_NAME=$CONFIG_FILE_NAME
 	ES_URL=$2; echo ES_URL=$ES_URL
+	LOGSTASH_INPUT_BEATS_PORT=$3; echo LOGSTASH_INPUT_BEATS_PORT=$LOGSTASH_INPUT_BEATS_PORT
 	if [ -z "$CONFIG_FILE_NAME" ]
         then
                 echo "Config file name is empty for the logstash instance"
@@ -35,8 +36,21 @@ prepareConfig(){
                 echo "ES URL is empty. Specify ES URL instance"
                 exit 1
         fi
+	if [ -z "$LOGSTASH_INPUT_BEATS_PORT" ]
+        then
+                echo "LOGSTASH_INPUT_BEATS_PORT is empty. Specify LOGSTASH_INPUT_BEATS_PORT"
+                exit 1
+        fi
 
-	cat $TEMPLATE_CONFIG > $CONFIG_FILE_NAME
+	echo "" > $CONFIG_FILE_NAME
+	echo "input {" >> $CONFIG_FILE_NAME
+  	echo "	beats {" >> $CONFIG_FILE_NAME
+    	echo "		port => $LOGSTASH_INPUT_BEATS_PORT" >> $CONFIG_FILE_NAME
+    	echo "		host => \"0.0.0.0\"" >> $CONFIG_FILE_NAME
+  	echo "	}" >> $CONFIG_FILE_NAME
+	echo "}" >> $CONFIG_FILE_NAME
+
+	cat $TEMPLATE_CONFIG >> $CONFIG_FILE_NAME
 	echo "" >> $CONFIG_FILE_NAME
 	echo "output {" >> $CONFIG_FILE_NAME
   	echo "	elasticsearch {" >> $CONFIG_FILE_NAME
@@ -59,18 +73,21 @@ function run(){
 	ES_URL=$4; echo ES_URL=$ES_URL
 	echo 
 	prepareYmlConfig $YML_LOGSTASH_CONFIG $ES_URL 
-	prepareConfig $LOGSTASH_CONFIG $ES_URL
+	prepareConfig $LOGSTASH_CONFIG $ES_URL $3
 	docker run --name $LOGSTASH_INSTANCE_NAME \
 	-i \
  	-v $(pwd)/$YML_LOGSTASH_CONFIG:/usr/share/logstash/config/logstash.yml \
     	-v $(pwd)/$LOGSTASH_CONFIG:/usr/share/logstash/config/logstash.conf \
-	-p $2:9600 \
-	-p $3:5044 \
+	-p $2:$2 \
+	-p $3:$3 \
 	--network elk_network \
 	docker.elastic.co/logstash/logstash:6.7.1 -f /usr/share/logstash/config/logstash.conf --config.reload.automatic
 	echo
 #       -v ~/DockerExamples/logstash-filter.conf:/usr/share/logstash/config/logstash-filter.conf \
 #	 -e 'output { elasticsearch { hosts => "${ES_URL}" } }' \
+#  -p $2:9600 \
+#  -p $3:5044 \
+
 }
 echo "#####################################################"
 echo "###############        LOGSTASH          ############"
