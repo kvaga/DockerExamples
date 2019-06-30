@@ -13,6 +13,9 @@ function restart(){
 	docker container restart $1
 }
 
+function rm_containers_all(){
+ docker rm $(docker ps -aq)
+}
 function getContainerId(){
 	#echo "Getting container id for [$1]..."
         pid=$(docker container ls -a | grep $1 | awk {'print $1'})
