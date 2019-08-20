@@ -1,3 +1,4 @@
+# http://www.vinsguru.com/kafka-local-infrastructure-setup-using-docker-compose/
 version: '3'
 
 services:
